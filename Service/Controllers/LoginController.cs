@@ -71,7 +71,8 @@ namespace Service.Controllers
                     created = dataCriacao.ToString("yyyy-MM-dd HH:mm:ss"),
                     expiration = dataExpiracao.ToString("yyyy-MM-dd HH:mm:ss"),
                     accessToken = token,
-                    message = "OK"
+                    message = "OK",
+                    user = usuarioBase
                 };
             }
             else

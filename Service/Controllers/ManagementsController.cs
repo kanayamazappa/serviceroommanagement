@@ -78,6 +78,12 @@ namespace Service.Controllers
         [HttpPost]
         public async Task<ActionResult<Management>> PostManagement(Management management)
         {
+            var list = _context.Managements.Where(m => (m.Start >= management.Start && m.Start <= management.End) || (m.End >= management.Start && m.End <= management.End)).ToList();
+            if(list.Count > 0)
+            {
+                return BadRequest("Já existe um agendamento neste período");
+            }
+
             _context.Managements.Add(management);
             await _context.SaveChangesAsync();
 
