@@ -12,8 +12,10 @@ namespace Service.Models
         public string Name { get; set; }
         public bool Status { get; set; }
         [JsonIgnore]
-        public DateTime CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; }
         [JsonIgnore]
-        public DateTime AlterDate { get; set; }
+        public DateTime? AlterDate { get; set; }
+        [JsonIgnore]
+        public virtual List<Management> Managements { get; set; }
     }
 }

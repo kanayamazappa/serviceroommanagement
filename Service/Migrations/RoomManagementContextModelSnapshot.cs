@@ -21,23 +21,34 @@ namespace Service.Migrations
                     b.Property<int>("IdManagement")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("End");
+                    b.Property<DateTime>("Date");
 
-                    b.Property<int?>("RoomIdRoom");
+                    b.Property<int>("IdRoom");
 
-                    b.Property<DateTime>("Start");
+                    b.Property<int>("IdUser");
 
                     b.Property<string>("Title");
 
-                    b.Property<int?>("UserIdUser");
-
                     b.HasKey("IdManagement");
 
-                    b.HasIndex("RoomIdRoom");
+                    b.HasIndex("IdRoom");
 
-                    b.HasIndex("UserIdUser");
+                    b.HasIndex("IdUser");
 
                     b.ToTable("Managements");
+                });
+
+            modelBuilder.Entity("Service.Models.ManagementSchedule", b =>
+                {
+                    b.Property<int>("IdManagement");
+
+                    b.Property<int>("IdSchedule");
+
+                    b.HasKey("IdManagement", "IdSchedule");
+
+                    b.HasIndex("IdSchedule");
+
+                    b.ToTable("ManagementSchedules");
                 });
 
             modelBuilder.Entity("Service.Models.Room", b =>
@@ -45,9 +56,9 @@ namespace Service.Migrations
                     b.Property<int>("IdRoom")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("AlterDate");
+                    b.Property<DateTime?>("AlterDate");
 
-                    b.Property<DateTime>("CreateDate");
+                    b.Property<DateTime?>("CreateDate");
 
                     b.Property<string>("Name");
 
@@ -56,6 +67,20 @@ namespace Service.Migrations
                     b.HasKey("IdRoom");
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("Service.Models.Schedule", b =>
+                {
+                    b.Property<int>("IdSchedule")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("End");
+
+                    b.Property<DateTime>("Start");
+
+                    b.HasKey("IdSchedule");
+
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("Service.Models.User", b =>
@@ -79,12 +104,27 @@ namespace Service.Migrations
             modelBuilder.Entity("Service.Models.Management", b =>
                 {
                     b.HasOne("Service.Models.Room", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomIdRoom");
+                        .WithMany("Managements")
+                        .HasForeignKey("IdRoom")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Service.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserIdUser");
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Service.Models.ManagementSchedule", b =>
+                {
+                    b.HasOne("Service.Models.Management", "Management")
+                        .WithMany("ManagementSchedules")
+                        .HasForeignKey("IdManagement")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Service.Models.Schedule", "Schedule")
+                        .WithMany("ManagementSchedules")
+                        .HasForeignKey("IdSchedule")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Service.Models;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Service.Models;
 
 namespace Service.Controllers
 {
@@ -20,7 +21,6 @@ namespace Service.Controllers
         }
 
         // GET: api/Managements
-        [Authorize("Bearer")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Management>>> GetManagements()
         {
@@ -28,7 +28,6 @@ namespace Service.Controllers
         }
 
         // GET: api/Managements/5
-        [Authorize("Bearer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Management>> GetManagement(int id)
         {
@@ -43,7 +42,6 @@ namespace Service.Controllers
         }
 
         // PUT: api/Managements/5
-        [Authorize("Bearer")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutManagement(int id, Management management)
         {
@@ -74,24 +72,23 @@ namespace Service.Controllers
         }
 
         // POST: api/Managements
-        [Authorize("Bearer")]
         [HttpPost]
         public async Task<ActionResult<Management>> PostManagement(Management management)
         {
-            var list = _context.Managements.Where(m => (m.Start >= management.Start && m.Start <= management.End) || (m.End >= management.Start && m.End <= management.End)).ToList();
-            if(list.Count > 0)
+            try
             {
-                return BadRequest("Já existe um agendamento neste período");
+                _context.Managements.Add(management);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetManagement", new { id = management.IdManagement }, management);
             }
-
-            _context.Managements.Add(management);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetManagement", new { id = management.IdManagement }, management);
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Managements/5
-        [Authorize("Bearer")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Management>> DeleteManagement(int id)
         {
