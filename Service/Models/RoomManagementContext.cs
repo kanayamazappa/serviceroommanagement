@@ -19,6 +19,17 @@ namespace Service.Models
             builder.Entity<Management>().HasKey(m => m.IdManagement);
             builder.Entity<Schedule>().HasKey(s => s.IdSchedule);
             builder.Entity<ManagementSchedule>().HasKey(ms => new { ms.IdManagement, ms.IdSchedule });
+            //If you name your foreign keys correctly, then you don't need this.
+            builder.Entity<ManagementSchedule>()
+                .HasOne(ms => ms.Management)
+                .WithMany(m => m.ManagementSchedules)
+                .HasForeignKey(ms => ms.IdManagement);
+
+            builder.Entity<ManagementSchedule>()
+                .HasOne(ms => ms.Schedule)
+                .WithMany(m => m.ManagementSchedules)
+                .HasForeignKey(ms => ms.IdSchedule);
+
             base.OnModelCreating(builder);
            
         }

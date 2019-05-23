@@ -24,14 +24,14 @@ namespace Service.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Management>>> GetManagements()
         {
-            return await _context.Managements.ToListAsync();
+            return await _context.Managements.Include(m => m.Room).Include(m => m.User).Include(m => m.ManagementSchedules).ToListAsync();
         }
 
         // GET: api/Managements/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Management>> GetManagement(int id)
         {
-            var management = await _context.Managements.FindAsync(id);
+            var management = await _context.Managements.Include(m => m.Room).Include(m => m.User).Include(m => m.ManagementSchedules).Where(m => m.IdManagement == id).FirstOrDefaultAsync();
 
             if (management == null)
             {
@@ -48,6 +48,20 @@ namespace Service.Controllers
             if (id != management.IdManagement)
             {
                 return BadRequest();
+            }
+
+            var listIdSchedule = await _context.ManagementSchedules.Where(ms => ms.Management.IdManagement != management.IdManagement && ms.Management.Date == management.Date && ms.Management.IdRoom == management.IdRoom).Select(ms => ms.IdSchedule).ToListAsync<int>();
+            if (management.ManagementSchedules.Where(ms => listIdSchedule.Contains(ms.IdSchedule)).Count() > 0)
+            {
+                return BadRequest("Existe um agendamento para esta sala neste período.");
+            }
+
+            var lstMsAux = await _context.ManagementSchedules.Where(ms => ms.IdManagement == id && !management.ManagementSchedules.Contains(ms)).ToListAsync();
+            _context.ManagementSchedules.RemoveRange(lstMsAux);
+            foreach (var item in management.ManagementSchedules)
+            {
+                item.IdManagement = 3;
+                _context.ManagementSchedules.Add(item);
             }
 
             _context.Entry(management).State = EntityState.Modified;
@@ -75,17 +89,16 @@ namespace Service.Controllers
         [HttpPost]
         public async Task<ActionResult<Management>> PostManagement(Management management)
         {
-            try
+            var listIdSchedule = await _context.ManagementSchedules.Where(ms => ms.Management.Date == management.Date && ms.Management.IdRoom == management.IdRoom).Select(ms => ms.IdSchedule).ToListAsync<int>();
+            if (management.ManagementSchedules.Where(ms => listIdSchedule.Contains(ms.IdSchedule)).Count() > 0)
             {
-                _context.Managements.Add(management);
-                await _context.SaveChangesAsync();
+                return BadRequest("Existe um agendamento para esta sala neste período.");
+            }
 
-                return CreatedAtAction("GetManagement", new { id = management.IdManagement }, management);
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            _context.Managements.Add(management);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetManagement", new { id = management.IdManagement }, management);
         }
 
         // DELETE: api/Managements/5
