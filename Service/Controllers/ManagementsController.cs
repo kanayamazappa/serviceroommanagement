@@ -60,7 +60,7 @@ namespace Service.Controllers
             _context.ManagementSchedules.RemoveRange(lstMsAux);
             foreach (var item in management.ManagementSchedules)
             {
-                item.IdManagement = 3;
+                item.IdManagement = management.IdManagement;
                 _context.ManagementSchedules.Add(item);
             }
 
